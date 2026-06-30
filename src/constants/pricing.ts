@@ -1,0 +1,46 @@
+export const plans = [
+  {
+    name: "Free",
+    price: "R0",
+    period: "forever",
+    desc: "For occasional job seekers who want to test the waters.",
+    features: [
+      "3 analyses per month",
+      "Overall match score",
+      "ATS compatibility check",
+      "Top 10 keyword suggestions",
+    ],
+    cta: "Start for free",
+    highlighted: false,
+  },
+  {
+    name: "Pro",
+    price: "R119.99",
+    period: "per month",
+    desc: "For active job seekers who want every advantage.",
+    features: [
+      "Unlimited analyses",
+      "Full AI rewrite suggestions",
+      "Score history",
+      "PDF reports",
+      "Priority support",
+    ],
+    cta: "Start Pro trial",
+    highlighted: true,
+  },
+  {
+    name: "Team",
+    price: "R429.99",
+    period: "per month",
+    desc: "Perfect for career coaches and hiring teams.",
+    features: [
+      "Everything in Pro",
+      "10 team members",
+      "Bulk resume analysis",
+      "Team dashboard",
+      "Shareable reports",
+    ],
+    cta: "Start Team trial",
+    highlighted: false,
+  },
+] as const;

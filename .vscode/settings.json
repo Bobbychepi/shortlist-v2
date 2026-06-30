@@ -1,0 +1,11 @@
+{
+  // This takes away that annoying warning
+  "css.lint.unknownAtRules": "ignore",
+
+  // ESLint and Prettier
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  }
+}
