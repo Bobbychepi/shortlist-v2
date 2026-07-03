@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import {Bricolage_Grotesque,Inter,} from "next/font/google";
 
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -25,13 +26,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${bricolage.variable} ${inter.variable} h-full antialiased`}
-    >
-      <body className="min-h-full bg-background text-foreground">
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="en"
+        className={`${bricolage.variable} ${inter.variable} h-full antialiased`}
+      >
+        <body className="min-h-full bg-background text-foreground">
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
