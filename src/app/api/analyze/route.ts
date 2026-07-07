@@ -21,10 +21,6 @@ const MIN_RESUME_TEXT_LENGTH = 50;
 type JsonObject = Record<string, unknown>;
 type KeywordImportance = KeywordResult["importance"];
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
 function decodePdfText(value: string): string {
   try {
     return decodeURIComponent(value);
@@ -180,7 +176,9 @@ function jsonError(message: string, status = 400) {
 }
 
 export async function POST(request: Request) {
-  if (!process.env.GROQ_API_KEY) {
+  const groqApiKey = process.env.GROQ_API_KEY?.trim();
+
+  if (!groqApiKey) {
     return jsonError("GROQ_API_KEY is not configured on the server.", 500);
   }
 
@@ -237,6 +235,10 @@ export async function POST(request: Request) {
   }
 
   try {
+    const groq = new Groq({
+      apiKey: groqApiKey,
+    });
+
     const completion = await groq.chat.completions.create({
       model: GROQ_MODEL,
       temperature: 0.2,
