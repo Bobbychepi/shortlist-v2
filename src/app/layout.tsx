@@ -15,9 +15,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Shortlist",
+  title: "Shortlist - by Bobby Chepi",
   description:
     "AI-powered resume analyzer that helps you get shortlisted.",
+  icons: {
+    icon: "/icon"
+  }
 };
 
 export default function RootLayout({

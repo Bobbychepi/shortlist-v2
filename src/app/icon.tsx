@@ -1,5 +1,4 @@
 import { ImageResponse } from "next/og";
-import { Sparkles } from "lucide-react";
 
 export const size = {
   width: 32,
@@ -21,11 +20,19 @@ export default function Icon() {
           background: "#08090f",
         }}
       >
-        <Sparkles
-          size={24}
-          color="white"
-          strokeWidth={2.5}
-        />
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9L12 3Z" />
+          <path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z" />
+        </svg>
       </div>
     ),
     size
