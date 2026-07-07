@@ -2,6 +2,7 @@
 
 import { ArrowRight, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
+import Link from "next/link";
 
 export default function CTASection() {
   return (
@@ -54,10 +55,13 @@ export default function CTASection() {
             </p>
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <button className="group flex items-center gap-2 rounded-xl bg-primary px-7 py-4 text-base font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent">
-                Analyze my resume now
+              <Link
+                href="/dashboard"
+                className="group bg-primary hover:bg-accent flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-medium text-white transition-all duration-200 hover:-translate-y-0.5"
+              >
+                Analyze my resume
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </button>
+              </Link>
 
 
             </div>

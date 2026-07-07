@@ -5,6 +5,7 @@ import { ArrowRight, FileText, Lightbulb, Sparkles, Star,} from "lucide-react";
 import CircularProgress from "../UI/CircularProgress";
 import MiniBar from "../UI/MiniBar";
 import SkillTag from "../UI/SkillTag";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -77,15 +78,26 @@ export default function Hero() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="flex flex-col gap-3 sm:flex-row"
           >
-            <button className="group bg-primary hover:bg-accent flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-medium text-white transition-all duration-200 hover:-translate-y-0.5">
-              Analyze my resume
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </button>
+          <Link
+            href="/dashboard"
+            className="group bg-primary hover:bg-accent flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-medium text-white transition-all duration-200 hover:-translate-y-0.5"
+          >
+            Analyze my resume
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
 
-            <button className="flex items-center justify-center gap-2 rounded-xl border border-white/10 px-6 py-3.5 text-white/60 transition-all duration-200 hover:border-white/20 hover:text-white">
-              <FileText className="h-4 w-4" />
-              See a sample report
-            </button>
+          <button
+            type="button"
+            onClick={() =>
+              document
+                .getElementById("AnalysisPreview")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+            className="flex items-center justify-center gap-2 rounded-xl border border-white/10 px-6 py-3.5 text-white/60 transition-all duration-200 hover:border-white/20 hover:text-white"
+          >
+            <FileText className="h-4 w-4" />
+            See a sample report
+          </button>
           </motion.div>
 
           <motion.div
