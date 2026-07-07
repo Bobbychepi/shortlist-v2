@@ -20,21 +20,66 @@ export default function Icon() {
           background: "#08090f",
         }}
       >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            width: 24,
+            height: 24,
+            color: "#ffffff",
+          }}
         >
-          <path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9L12 3Z" />
-          <path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z" />
-        </svg>
+          <div
+            style={{
+              position: "absolute",
+              left: 5,
+              top: 4,
+              width: 12,
+              height: 12,
+              background: "currentColor",
+              borderRadius: 2,
+              transform: "rotate(45deg)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              left: 10,
+              top: 1,
+              width: 2,
+              height: 18,
+              background: "currentColor",
+              borderRadius: 999,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              left: 2,
+              top: 9,
+              width: 18,
+              height: 2,
+              background: "currentColor",
+              borderRadius: 999,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              right: 2,
+              bottom: 2,
+              width: 5,
+              height: 5,
+              background: "currentColor",
+              borderRadius: 1,
+              transform: "rotate(45deg)",
+            }}
+          />
+        </div>
       </div>
     ),
-    size
+    {
+      ...size,
+    }
   );
 }
