@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Shortlist
 
-## Getting Started
+Shortlist is an AI-powered resume analysis platform that helps job seekers understand how well their resume matches a specific job description.
 
-First, run the development server:
+Users can upload a resume, provide a job description, and receive a structured analysis with a match score, ATS compatibility score, strengths, missing skills, keyword insights, and improvement recommendations.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
+* Resume upload support for PDF and DOCX files
+* Job description analysis
+* Resume-to-job match scoring
+* ATS compatibility scoring
+* Keyword and skill gap detection
+* Strengths and improvement recommendations
+* Saved analysis history in browser storage
+* Dashboard with score statistics and timeline chart
+* Recent analysis history with quick access to past reports
+* Responsive dark-mode interface
+* Authentication with Clerk
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Clerk Authentication
+- Groq SDK
+- Motion
+- Lucide React
+- Recharts
+- Radix UI Accordion
+- PDF parsing with `pdf2json`
+- DOCX parsing with `mammoth`
+- Code quality with ESLint and Prettier
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How It Works
+1. The user uploads a resume in PDF or DOCX format.
+2. The user pastes a target job description.
+3. The API extracts text from the resume.
+4. The resume and job description are sent to the AI analysis service.
+5. The system generates match scores, ATS feedback, skills analysis, and recommendations.
+6. Results are saved locally in browser storage.
+7. The dashboard displays saved analyses, statistics, and score history.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Future Improvements
+* Export/Downalod analysis reports as PDF
+* Cloud database storage
+* User profile and saved resumes
+* Job application tracker
+* Cover letter generator
+* Resume version comparison
+* Shareable analysis reports
+* More detailed ATS keyword scoring
 
-## Learn More
+## Author
+Bobby Chepi
+Full-Stack Software Developer
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+This project is for portfolio and educational purposes.

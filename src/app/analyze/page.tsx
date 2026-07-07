@@ -3,31 +3,14 @@
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import {
-  ArrowRight,
-  Brain,
-  CheckCircle,
-  FileText,
-  RotateCcw,
-  Upload,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, Brain, CheckCircle, FileText, RotateCcw, Upload, Zap } from "lucide-react";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-
-type UploadedFile = {
-  name: string;
-  size: string;
-};
-
-const analyzeSteps = [
-  "Parsing resume content",
-  "Reading job requirements",
-  "Running AI analysis",
-  "Scoring ATS compatibility",
-  "Generating insights & rewrites",
-];
+import { AnalysisResult } from "@/types/analysis";
+import { saveAnalysis } from "@/lib/analysis-storage";
+import { analyzeSteps } from "@/constants/analyze";
+import { UploadedFile } from "@/types/analysis";
 
 export default function AnalyzePage() {
   const router = useRouter();
@@ -38,17 +21,31 @@ export default function AnalyzePage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStep, setAnalysisStep] = useState(-1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((file: File) => {
     const isValid =
       file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf") ||
       file.name.toLowerCase().endsWith(".docx");
 
-    if (!isValid) return;
+    const isUnderLimit = file.size <= 10 * 1024 * 1024;
 
+    if (!isValid) {
+      setApiError("Please upload a PDF or DOCX file.");
+      return;
+    }
+
+    if (!isUnderLimit) {
+      setApiError("File is too large. Max size is 10MB.");
+      return;
+    }
+
+    setApiError(null);
     setUploadedFile({
+      file,
       name: file.name,
       size: `${(file.size / 1024).toFixed(0)} KB`,
     });
@@ -66,21 +63,52 @@ export default function AnalyzePage() {
   );
 
   async function runAnalysis() {
-    if (!uploadedFile || jobDesc.trim().length <= 50) return;
+    const trimmedJobDesc = jobDesc.trim();
 
-    setIsAnalyzing(true);
-    setCompletedSteps([]);
-
-    for (let i = 0; i < analyzeSteps.length; i++) {
-      setAnalysisStep(i);
-      await new Promise((resolve) => setTimeout(resolve, 700));
-      setCompletedSteps((prev) => [...prev, i]);
+    if (!uploadedFile) {
+      setApiError("Please upload a resume before analyzing.");
+      return;
     }
 
-    router.push("/results");
+    if (trimmedJobDesc.length < 10) {
+      setApiError("Job description must be at least 10 characters.");
+      return;
+    }
+
+    setApiError(null);
+    setIsAnalyzing(true);
+    setCompletedSteps([]);
+    setAnalysisStep(0);
+
+    try {
+      const formData = new FormData();
+      formData.append("resume", uploadedFile.file);
+      formData.append("jobDescription", trimmedJobDesc);
+
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = (await response.json()) as AnalysisResult | { error?: string };
+
+      if (!response.ok) {
+        throw new Error("error" in result && result.error ? result.error : "Analysis failed. Please try again.");
+      }
+
+      saveAnalysis(result as AnalysisResult);
+      setCompletedSteps([0, 1, 2, 3, 4]);
+      setAnalysisStep(analyzeSteps.length - 1);
+      router.push("/results");
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message : "Analysis failed. Please try again.");
+      setIsAnalyzing(false);
+      setAnalysisStep(-1);
+      setCompletedSteps([]);
+    }
   }
 
-  const canAnalyze = uploadedFile && jobDesc.trim().length > 50;
+  const canAnalyze = Boolean(uploadedFile) && jobDesc.trim().length >= 10;
 
   return (
     <main className="min-h-screen bg-[#08090f] text-white">
@@ -94,13 +122,9 @@ export default function AnalyzePage() {
                 <Brain className="h-8 w-8 text-indigo-400" />
               </div>
 
-              <h2 className="mb-2 text-2xl font-bold">
-                Analyzing your resume
-              </h2>
+              <h2 className="mb-2 text-2xl font-bold">Analyzing your resume</h2>
 
-              <p className="text-sm text-white/40">
-                Checking your resume against the job description.
-              </p>
+              <p className="text-sm text-white/40">Checking your resume against the job description.</p>
             </div>
 
             <div className="space-y-3">
@@ -115,8 +139,8 @@ export default function AnalyzePage() {
                       done
                         ? "border-emerald-500/20 bg-emerald-500/10"
                         : active
-                        ? "border-indigo-500/30 bg-indigo-500/10"
-                        : "border-white/6 bg-white/2"
+                          ? "border-indigo-500/30 bg-indigo-500/10"
+                          : "border-white/6 bg-white/2"
                     }`}
                   >
                     {done ? (
@@ -127,15 +151,7 @@ export default function AnalyzePage() {
                       <div className="h-4 w-4 rounded-full border border-white/20" />
                     )}
 
-                    <span
-                      className={`text-sm ${
-                        done
-                          ? "text-emerald-400"
-                          : active
-                          ? "text-white"
-                          : "text-white/30"
-                      }`}
-                    >
+                    <span className={`text-sm ${done ? "text-emerald-400" : active ? "text-white" : "text-white/30"}`}>
                       {step}
                     </span>
                   </div>
@@ -155,9 +171,7 @@ export default function AnalyzePage() {
         >
           <div>
             <h1 className="text-3xl font-bold">New Analysis</h1>
-            <p className="mt-1 text-sm text-white/35">
-              Upload your resume and paste the job description.
-            </p>
+            <p className="mt-1 text-sm text-white/35">Upload your resume and paste the job description.</p>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
@@ -169,9 +183,7 @@ export default function AnalyzePage() {
                 <h2 className="font-semibold">Upload your resume</h2>
               </div>
 
-              <p className="ml-8 text-xs text-white/35">
-                PDF or DOCX · Max 10MB
-              </p>
+              <p className="ml-8 text-xs text-white/35">PDF or DOCX · Max 10MB</p>
 
               <motion.div
                 onDragOver={(event) => {
@@ -181,10 +193,10 @@ export default function AnalyzePage() {
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
                 onClick={() => !uploadedFile && fileRef.current?.click()}
-                className={`relative min-h-[260px] overflow-hidden rounded-2xl border-2 border-dashed transition ${
+                className={`relative min-h-65 overflow-hidden rounded-2xl border-2 border-dashed transition ${
                   uploadedFile
                     ? "cursor-default border-emerald-500/40 bg-emerald-500/5"
-                    : "cursor-pointer border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02]"
+                    : "cursor-pointer border-white/8 hover:border-white/20 hover:bg-white/2"
                 }`}
               >
                 <input
@@ -206,36 +218,33 @@ export default function AnalyzePage() {
                       </div>
 
                       <div>
-                        <p className="mb-1 font-semibold">
-                          {uploadedFile.name}
-                        </p>
-                        <p className="text-xs text-white/40">
-                          {uploadedFile.size} · Ready to analyze
-                        </p>
+                        <p className="mb-1 font-semibold">{uploadedFile.name}</p>
+                        <p className="text-xs text-white/40">{uploadedFile.size} · Ready to analyze</p>
                       </div>
 
                       <button
+                        type="button"
                         onClick={(event) => {
                           event.stopPropagation();
                           setUploadedFile(null);
-                          fileRef.current?.click();
+                          if (fileRef.current) {
+                            fileRef.current.value = "";
+                          }
                         }}
                         className="flex items-center gap-1.5 text-xs text-white/30 transition hover:text-white/60"
                       >
                         <RotateCcw className="h-3 w-3" />
-                        Replace file
+                        Remove file
                       </button>
                     </>
                   ) : (
                     <>
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05]">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
                         <Upload className="h-7 w-7 text-white/40" />
                       </div>
 
                       <div>
-                        <p className="mb-1 font-medium">
-                          {isDragging ? "Drop it here" : "Drop your resume here"}
-                        </p>
+                        <p className="mb-1 font-medium">{isDragging ? "Drop it here" : "Drop your resume here"}</p>
                         <p className="text-sm text-white/35">
                           or <span className="text-indigo-400">browse files</span>
                         </p>
@@ -254,57 +263,39 @@ export default function AnalyzePage() {
                 <h2 className="font-semibold">Paste job description</h2>
               </div>
 
-              <p className="ml-8 text-xs text-white/35">
-                Add the role requirements so Shortlist can compare properly.
-              </p>
+              <p className="ml-8 text-xs text-white/35">Add the role requirements so Shortlist can compare properly.</p>
 
               <textarea
                 value={jobDesc}
                 onChange={(event) => setJobDesc(event.target.value)}
                 placeholder="Paste the full job description here..."
-                className="min-h-[260px] w-full resize-none rounded-2xl border border-white/[0.08] bg-[#0e0f1d] p-5 text-sm text-white outline-none transition placeholder:text-white/20 focus:border-indigo-500/50"
+                className="min-h-65 w-full resize-none rounded-2xl border border-white/8 bg-[#0e0f1d] p-5 text-sm text-white outline-none transition placeholder:text-white/20 focus:border-indigo-500/50"
               />
 
-              <p className="text-right text-xs text-white/25">
-                {jobDesc.trim().length} characters
-              </p>
+              <p className="text-right text-xs text-white/25">{jobDesc.trim().length} characters</p>
             </div>
           </div>
 
           <div className="flex items-center justify-between rounded-2xl border border-white/[0.07] bg-[#0e0f1d] p-5">
             <div>
-              <h3 className="font-semibold">
-                {canAnalyze ? "Ready to analyze!" : "Complete both steps above"}
-              </h3>
+              <h3 className="font-semibold">{canAnalyze ? "Ready to analyze!" : "Complete both steps above"}</h3>
 
               <div className="mt-2 flex gap-4 text-xs">
-                <span
-                  className={
-                    uploadedFile ? "text-emerald-400" : "text-white/30"
-                  }
-                >
-                  Resume uploaded
-                </span>
-
-                <span
-                  className={
-                    jobDesc.trim().length > 50
-                      ? "text-emerald-400"
-                      : "text-white/30"
-                  }
-                >
+                <span className={uploadedFile ? "text-emerald-400" : "text-white/30"}>Resume uploaded</span>
+                <span className={jobDesc.trim().length >= 10 ? "text-emerald-400" : "text-white/30"}>
                   Job description added
                 </span>
               </div>
             </div>
 
             <button
+              type="button"
               onClick={runAnalysis}
-              disabled={!canAnalyze}
+              disabled={!canAnalyze || isAnalyzing}
               className={`flex items-center gap-2.5 rounded-xl px-8 py-3.5 text-sm font-medium transition ${
-                canAnalyze
+                canAnalyze && !isAnalyzing
                   ? "bg-indigo-500 text-white hover:-translate-y-0.5 hover:bg-indigo-400"
-                  : "cursor-not-allowed bg-white/[0.05] text-white/25"
+                  : "cursor-not-allowed bg-white/5 text-white/25"
               }`}
             >
               <Zap className="h-4 w-4" />
@@ -312,6 +303,12 @@ export default function AnalyzePage() {
               {canAnalyze && <ArrowRight className="h-4 w-4" />}
             </button>
           </div>
+
+          {apiError && (
+            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-100">
+              {apiError}
+            </div>
+          )}
         </motion.div>
       </section>
 
